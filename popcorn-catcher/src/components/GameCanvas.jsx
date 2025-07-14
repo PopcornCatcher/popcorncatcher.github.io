@@ -1,19 +1,21 @@
 // components/GameCanvas.jsx
-import React from 'react';
-import { useFrame } from '@react-three/fiber';
-import PopcornBucket from './PopcornBucket';
-import FallingItem from './FallingItem';
-import useGameLogic from '../hooks/useGameLogic';
+import React from "react"
+import { useFrame } from "@react-three/fiber"
+import PopcornBucket from "./PopcornBucket"
+import FallingItem from "./FallingItem"
+import useGameLogic from "../hooks/useGameLogic"
+import PartyBackground from "./PartyBackground"
 
 export default function GameCanvas() {
-  const { items, bucketRef, score, update } = useGameLogic();
+  const { items, bucketRef, score, update } = useGameLogic()
 
-  useFrame(() => update());
+  useFrame(() => update())
 
   return (
     <>
       {/* Background */}
-      <color attach="background" args={["#87CEEB"]} />
+      {/* <color attach="background" args={["#87CEEB"]} /> */}
+      <PartyBackground/>
 
       {/* Falling items */}
       {items.map((item, index) => (
@@ -23,5 +25,5 @@ export default function GameCanvas() {
       {/* Bucket */}
       <PopcornBucket ref={bucketRef} />
     </>
-  );
+  )
 }

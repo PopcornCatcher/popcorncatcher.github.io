@@ -6,10 +6,10 @@ import "./App.css"
 
 export default function App() {
   return (
-    <div className="App">
-      <Canvas orthographic camera={{ zoom: 80, position: [0, 0, 100] }}>
+    // <div className="App">
+      <Canvas className="webgl" styles={{width:"750px", height:"1334px"}} orthographic camera={{ zoom: 80, position: [0, 0, 100] }}>
         <GameCanvas />
       </Canvas>
-    </div>
+    // </div>
   )
 }
