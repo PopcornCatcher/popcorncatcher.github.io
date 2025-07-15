@@ -9,7 +9,6 @@ export class Game {
       context: gl,
     })
 
-
     // this.scene = new THREE.Scene()
     // this.camera = new THREE.OrthographicCamera(-this.width / 200, this.width / 200, this.height / 200, -this.height / 200, 0.1, 1000)
     // this.camera.position.z = 10
@@ -46,10 +45,21 @@ export class Game {
     const light = new THREE.AmbientLight(0xffffff, 1)
     this.scene.add(light)
 
+    // loader
+    const loader = new THREE.TextureLoader()
+
     // Bucket
-    this.bucket = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.2), new THREE.MeshStandardMaterial({ color: "red" }))
-    this.bucket.position.y = -1.8
-    this.scene.add(this.bucket)
+    loader.load("/assets/Bucket.png", (texture) => {
+      const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true })
+      const geometry = new THREE.PlaneGeometry(0.8, 0.8) // Adjust size as needed
+      this.bucket = new THREE.Mesh(geometry, material)
+      this.bucket.position.y = -1.8
+      this.scene.add(this.bucket)
+    })
+
+    // this.bucket = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.2), new THREE.MeshStandardMaterial({ color: "red" }))
+    // this.bucket.position.y = -1.8
+    // this.scene.add(this.bucket)
 
     // Mouse move
     this.onMouseMove = this.onMouseMove.bind(this)
@@ -66,14 +76,33 @@ export class Game {
   }
 
   spawnItem() {
-    const geo = new THREE.SphereGeometry(0.05, 16, 16)
-    const color = Math.random() > 0.5 ? "yellow" : "brown"
-    const mat = new THREE.MeshStandardMaterial({ color })
-    const mesh = new THREE.Mesh(geo, mat)
-    mesh.position.x = THREE.MathUtils.randFloat(-1.5, 1.5)
-    mesh.position.y = 2
-    this.scene.add(mesh)
-    this.fallingItems.push(mesh)
+    //   const geo = new THREE.SphereGeometry(0.05, 16, 16)
+    //   const color = Math.random() > 0.5 ? "yellow" : "brown"
+    //   const mat = new THREE.MeshStandardMaterial({ color })
+    //   const mesh = new THREE.Mesh(geo, mat)
+    //   mesh.position.x = THREE.MathUtils.randFloat(-1.5, 1.5)
+    //   mesh.position.y = 2
+    //   this.scene.add(mesh)
+    //   this.fallingItems.push(mesh)
+    const loader = new THREE.TextureLoader()
+    const isPopcorn = Math.random() > 0.5
+    const texturePath = isPopcorn ? "/assets/Popcorn.png" : "/assets/BurntPopcorn.png"
+
+    loader.load(texturePath, (texture) => {
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+      })
+      const geometry = new THREE.PlaneGeometry(0.2, 0.2) // Adjust size if needed
+      const mesh = new THREE.Mesh(geometry, material)
+
+      mesh.position.x = THREE.MathUtils.randFloat(-1.5, 1.5)
+      mesh.position.y = 2
+      mesh.rotation.z = Math.random() * Math.PI * 2 // Optional: random rotation
+
+      this.scene.add(mesh)
+      this.fallingItems.push(mesh)
+    })
   }
 
   updateItems() {
