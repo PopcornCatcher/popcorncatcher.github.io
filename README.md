@@ -1,5 +1,9 @@
 # PopcornCatcher
 
+* Live: https://popcorncatcher.github.io
+* GitHub: https://github.com/popcorncatcher/popcorncatcher.github.io
+* Figma: https://www.figma.com/design/Vweul8SinBjjwiSI3UZpYp/PopcornCatcher
+
 ## Assignment: Code this game in ThreeJS
 
 This document outlines an assignment showcasing the work of a senior creative developer in coding the proposed game.
