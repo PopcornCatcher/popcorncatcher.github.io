@@ -1,6 +1,15 @@
 import * as THREE from "three"
 
 export class Game {
+  renderer = null
+  scene = null
+  camera = null
+  bucket = null
+  fallingItems = []
+  clock = null
+  spawnTimer = 0
+  canvas = null
+
   constructor(canvas, gl) {
     this.canvas = canvas
 
@@ -8,13 +17,26 @@ export class Game {
       canvas: canvas,
       context: gl,
     })
+    // Desired size
+    this.width = 750
+    this.height = window.innerHeight
+
+    this.renderer.setSize(this.width, this.height)
+
+    // this.width = canvas.width
+    // this.height = canvas.height width={750} height={1334}
+
+    // Set canvas DOM size
+    // this.canvas.width = width;
+    // this.canvas.height = height;
+    // this.canvas.style.width = width + 'px';
+    // this.canvas.style.height = height + 'px';
 
     // this.scene = new THREE.Scene()
     // this.camera = new THREE.OrthographicCamera(-this.width / 200, this.width / 200, this.height / 200, -this.height / 200, 0.1, 1000)
     // this.camera.position.z = 10
 
     // this.renderer = new THREE.WebGLRenderer({ antialias: true })
-    // this.renderer.setSize(this.width, this.height)
     // // this.container.appendChild(this.renderer.domElement)
 
     this.bucket = null
@@ -33,6 +55,9 @@ export class Game {
     // this.camera.position.z = 10
 
     this.init()
+
+    window.addEventListener("resize", this.onWindowResize)
+    this.onWindowResize() // Call once at start
   }
 
   init() {
@@ -59,7 +84,7 @@ export class Game {
 
     // Mouse move
     this.onMouseMove = this.onMouseMove.bind(this)
-    window.addEventListener("mousemove", this.onMouseMove)
+    this.canvas.addEventListener("mousemove", this.onMouseMove)
 
     // Start animation
     this.animate = this.animate.bind(this)
@@ -68,6 +93,8 @@ export class Game {
 
   onMouseMove(event) {
     const x = (event.clientX / this.width) * 2 - 1
+    // console.log("object position x:", this.bucket)
+    console.log("width", this.width, "height", this.height)
     this.bucket.position.x = x * (this.width / this.height)
   }
 
@@ -133,9 +160,21 @@ export class Game {
     this.renderer.render(this.scene, this.camera)
   }
 
+  onWindowResize() {
+    const height = window.innerHeight
+    const width = 750
+
+    // Update camera
+    // this.camera.aspect = width / height
+    this.camera.updateProjectionMatrix()
+
+    // Update renderer
+    this.renderer.setSize(width, height)
+  }
+
   dispose() {
     // cancelAnimationFrame(this.frameId)
     this.renderer.dispose()
-    window.removeEventListener("mousemove", this.onMouseMove)
+    this.canvas.removeEventListener("mousemove", this.onMouseMove)
   }
 }

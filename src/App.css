@@ -1,12 +1,27 @@
-.webgl {
-  position: fixed;
+/* .webgl { */
+  /* position: fixed;
   top: 0;
-  left: 0;
-  outline: none;
-  margin: 0 auto;
-  overflow:hidden;
-  user-select: none;
+  left: 0; */
+  
   /* width: "100vw";
   height: "100vh"; */
   /* margin: 0 auto; */
+/* } */
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center; /* vertical center */
+  height: 100vh;
+}
+
+.webgl {
+  width: 100vw;
+  height: 100vh;
+  outline: none;
+  margin: 0 auto;
+  overflow: hidden;
+  user-select: none;
+  display: block; /* removes the default inline-block spacing */
 }
