@@ -51,15 +51,7 @@ const GameCanvas = () => {
     }
   }, [])
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="webgl"
-      width={window.innerWidth}
-      height={window.innerHeight}
-      style={{ display: "block" }}
-    />
-  )
+  return <canvas ref={canvasRef} className="webgl" width={750} height={1334} style={{ width: "375px", height: "667px", display: "block" }} />
 }
 
 export default GameCanvas

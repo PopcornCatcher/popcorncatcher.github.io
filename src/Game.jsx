@@ -53,13 +53,9 @@ export class Game {
       const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true })
       const geometry = new THREE.PlaneGeometry(0.8, 0.8) // Adjust size as needed
       this.bucket = new THREE.Mesh(geometry, material)
-      this.bucket.position.y = -1.8
+      this.bucket.position.y = -3.3
       this.scene.add(this.bucket)
     })
-
-    // this.bucket = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.2), new THREE.MeshStandardMaterial({ color: "red" }))
-    // this.bucket.position.y = -1.8
-    // this.scene.add(this.bucket)
 
     // Mouse move
     this.onMouseMove = this.onMouseMove.bind(this)
@@ -76,14 +72,6 @@ export class Game {
   }
 
   spawnItem() {
-    //   const geo = new THREE.SphereGeometry(0.05, 16, 16)
-    //   const color = Math.random() > 0.5 ? "yellow" : "brown"
-    //   const mat = new THREE.MeshStandardMaterial({ color })
-    //   const mesh = new THREE.Mesh(geo, mat)
-    //   mesh.position.x = THREE.MathUtils.randFloat(-1.5, 1.5)
-    //   mesh.position.y = 2
-    //   this.scene.add(mesh)
-    //   this.fallingItems.push(mesh)
     const loader = new THREE.TextureLoader()
     const isPopcorn = Math.random() > 0.5
     const texturePath = isPopcorn ? "/assets/Popcorn.png" : "/assets/BurntPopcorn.png"
