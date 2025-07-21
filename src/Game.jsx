@@ -77,6 +77,17 @@ export class Game {
     this.pane = new Pane()
     this.fontLoader = new FontLoader()
 
+    // Load font once
+    this.fontLoader.load(
+      "https://threejs.org/examples/fonts/helvetiker_bold.typeface.json",
+      (font) => {
+        this.font = font
+        this.createScore() // Safe to call now
+      },
+      undefined,
+      (err) => console.error("Font load error:", err)
+    )
+
     // const controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     this.init()
@@ -166,43 +177,32 @@ export class Game {
   }
 
   createScore() {
-    const fontLoader = new FontLoader()
-    fontLoader.load(
-      "https://threejs.org/examples/fonts/helvetiker_bold.typeface.json",
-      (font) => {
-        const text = "helo"
-        const geometry = new TextGeometry(this.score.toString(), {
-          font: font,
-          size: 0.3,
-          // height: 2,
-          depth: 0.01,
-          // bevelThickness: 0.1,
-          // bevelSize: 0.05,
-          // bevelOffset: 0,
-          // bevelSegments: 5,
-          // bevelEnabled: true,
-          // curveSegments: 1,
-          bevelEnabled: false,
-        })
+    if (!this.font) return
 
-        // geometry.computeBoundingBox()
-        // geometry.center()
+    // Dispose old mesh if exists
+    if (this.scoreMesh) {
+      this.scene.remove(this.scoreMesh)
+      this.scoreMesh.geometry.dispose()
+      this.scoreMesh.material.dispose()
+    }
 
-        const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-        this.scoreMesh = new THREE.Mesh(geometry, material)
+    const geometry = new TextGeometry(this.score.toString(), {
+      font: this.font,
+      size: 0.3,
+      depth: 0.01,
+      bevelEnabled: false,
+    })
 
-        this.scoreMesh.position.set(0, 0, 0)
-        this.scene.add(this.scoreMesh)
+    const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+    this.scoreMesh = new THREE.Mesh(geometry, material)
+    this.scoreMesh.position.set(0, 3, 0)
+    this.scene.add(this.scoreMesh)
+  }
 
-        const pane = new Pane()
-        const folder = pane.addFolder({ title: "Score", expanded: true })
-        folder.addBinding(this.scoreMesh.position, "x", { min: -100, max: 100, step: 0.1, label: "ScoreX" })
-        folder.addBinding(this.scoreMesh.position, "y", { min: -100, max: 100, step: 0.1, label: "ScoreY" })
-        folder.addBinding(this.scoreMesh.position, "z", { min: -100, max: 100, step: 0.1, label: "ScoreZ" })
-      },
-      undefined,
-      (err) => console.error("Font load error:", err)
-    )
+  // Call this method when score updates
+  updateScore(value) {
+    this.score = value
+    this.createScore()
   }
 
   goStartGame() {
@@ -671,13 +671,16 @@ export class Game {
         // Add scoring logic here
         if (item.userData.isGold) {
           this.score += 10
+          this.updateScore(this.score)
           // this.scoreMesh.
           console.log("Gold popcorn caught! +10 points")
         } else if (item.userData.isPopcorn) {
           this.score += 1
+          this.updateScore(this.score)
           console.log("Popcorn caught! +1 point")
         } else {
           this.score -= 1
+          this.updateScore(this.score)
           console.log("Burnt popcorn caught! -1 point")
         }
         continue
