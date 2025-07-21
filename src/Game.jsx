@@ -1,5 +1,6 @@
 import * as THREE from "three"
 import { Pane } from "tweakpane"
+import * as CANNON from "cannon-es"
 
 export class Game {
   renderer = null
@@ -133,7 +134,9 @@ export class Game {
     const backgroundMesh = new THREE.Mesh(geometry, material)
     backgroundMesh.position.z = -10 // Push behind all objects
     backgroundMesh.renderOrder = -1 // Render first
-    this.scene.add(backgroundMesh)
+    // this.scene.add(backgroundMesh)
+
+    this.scene.background = texture
   }
 
   addBucket() {
@@ -154,7 +157,7 @@ export class Game {
     
     const geometry = new THREE.PlaneGeometry(1.5, 1.5) // Adjust size as needed
     this.bucket = new THREE.Mesh(geometry, material)
-    this.bucket.position.y = -3.3
+    this.bucket.position.y = -3.2
     this.bucket.position.z = 0
     this.scene.add(this.bucket)
 
@@ -255,7 +258,7 @@ export class Game {
     
     if (this.isPointInBucket(worldCoords.x, worldCoords.y)) {
       this.isDragging = true
-      this.dragOffset.x = worldCoords.x - this.bucket.position.x
+      // this.dragOffset.x = worldCoords.x - this.bucket.position.x
       this.dragOffset.y = worldCoords.y - this.bucket.position.y
       this.canvas.style.cursor = "grabbing"
     }
@@ -283,11 +286,11 @@ export class Game {
     // Constrain bucket movement within camera bounds
     const maxX = this.camera.right - 0.75 // Half bucket width
     const minX = this.camera.left + 0.75
-    const maxY = this.camera.top - 0.75 // Half bucket height
-    const minY = this.camera.bottom + 0.75
+    // const maxY = this.camera.top - 0.75 // Half bucket height
+    // const minY = this.camera.bottom + 0.75
     
     this.bucket.position.x = THREE.MathUtils.clamp(newX, minX, maxX)
-    this.bucket.position.y = THREE.MathUtils.clamp(newY, minY, maxY)
+    // this.bucket.position.y = THREE.MathUtils.clamp(newY, minY, maxY)
   }
 
   onMouseUp(event) {
