@@ -181,6 +181,38 @@ export class Game {
     }
   }
 
+  setupPhysics() {
+    // Initialize physics world
+    this.world = new CANNON.World()
+    this.world.gravity.set(0, -9.82, 0)
+    this.world.broadphase = new CANNON.NaiveBroadphase()
+    this.world.solver.iterations = 10
+
+    // Create materials
+    this.defaultMaterial = new CANNON.Material("default")
+    this.bucketMaterial = new CANNON.Material("bucket")
+    this.popcornMaterial = new CANNON.Material("popcorn")
+    this.groundMaterial = new CANNON.Material("ground")
+
+    // Contact materials
+    const bucketPopcornContact = new CANNON.ContactMaterial(this.bucketMaterial, this.popcornMaterial, {
+      friction: 0.3,
+      restitution: 0.8,
+      contactEquationStiffness: 1e8,
+      contactEquationRelaxation: 3,
+    })
+
+    const groundPopcornContact = new CANNON.ContactMaterial(this.groundMaterial, this.popcornMaterial, {
+      friction: 0.7,
+      restitution: 0.3,
+      contactEquationStiffness: 1e8,
+      contactEquationRelaxation: 3,
+    })
+
+    this.world.addContactMaterial(bucketPopcornContact)
+    this.world.addContactMaterial(groundPopcornContact)
+  }
+  
   addPanel() {
     const camera = this.pane.addFolder({
       title: "Camera",
@@ -281,7 +313,7 @@ export class Game {
     
     // Apply drag offset
     let newX = worldCoords.x - this.dragOffset.x
-    let newY = worldCoords.y - this.dragOffset.y
+    // let newY = worldCoords.y - this.dragOffset.y
     
     // Constrain bucket movement within camera bounds
     const maxX = this.camera.right - 0.75 // Half bucket width
