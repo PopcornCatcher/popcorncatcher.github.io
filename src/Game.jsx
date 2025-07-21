@@ -1,12 +1,17 @@
 import * as THREE from "three"
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js"
+
 import { Pane } from "tweakpane"
 import * as CANNON from "cannon-es"
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader"
+// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
 export class Game {
   renderer = null
   scene = null
   camera = null
   bucket = null
+  scoreMesh = null
   popcorn = []
   fallingItems = []
   clock = new THREE.Clock()
@@ -27,6 +32,10 @@ export class Game {
     background: null,
     goldPopcorn: null,
   }
+
+  // score
+  isStartGame = null
+  score = 0
 
   constructor(canvas, gl) {
     this.canvas = canvas
@@ -66,9 +75,11 @@ export class Game {
     // loader
     this.loader = new THREE.TextureLoader()
     this.pane = new Pane()
+    this.fontLoader = new FontLoader()
+
+    // const controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     this.init()
-    this.setupPhysics()
   }
 
   loadTexture(path) {
@@ -84,6 +95,10 @@ export class Game {
       burntPopcorn: "/assets/BurntPopcorn.png",
       background: "/assets/Background.png",
       goldPopcorn: "/assets/GoldPopcorn.png",
+      one: "/assets/1.png",
+      two: "/assets/2.png",
+      three: "/assets/3.png",
+      go: "/assets/go.png",
     }
 
     const promises = Object.entries(assets).map(([key, path]) => {
@@ -137,6 +152,103 @@ export class Game {
     this.scene.background = texture
   }
 
+  addLight() {
+    // LIGHTS
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.4)
+    dirLight.position.set(0, 0, 1).normalize()
+    this.scene.add(dirLight)
+
+    const pointLight = new THREE.PointLight(0xffffff, 4.5, 0, 0)
+    pointLight.color.setHSL(Math.random(), 1, 0.5)
+    pointLight.position.set(0, 100, 90)
+    this.scene.add(pointLight)
+  }
+
+  createScore() {
+    const fontLoader = new FontLoader()
+    fontLoader.load(
+      "https://threejs.org/examples/fonts/helvetiker_bold.typeface.json",
+      (font) => {
+        const text = "helo"
+        const geometry = new TextGeometry(this.score.toString(), {
+          font: font,
+          size: 0.3,
+          // height: 2,
+          depth: 0.01,
+          // bevelThickness: 0.1,
+          // bevelSize: 0.05,
+          // bevelOffset: 0,
+          // bevelSegments: 5,
+          // bevelEnabled: true,
+          // curveSegments: 1,
+          bevelEnabled: false,
+        })
+
+        // geometry.computeBoundingBox()
+        // geometry.center()
+
+        const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+        this.scoreMesh = new THREE.Mesh(geometry, material)
+
+        this.scoreMesh.position.set(0, 0, 0)
+        this.scene.add(this.scoreMesh)
+
+        const pane = new Pane()
+        const folder = pane.addFolder({ title: "Score", expanded: true })
+        folder.addBinding(this.scoreMesh.position, "x", { min: -100, max: 100, step: 0.1, label: "ScoreX" })
+        folder.addBinding(this.scoreMesh.position, "y", { min: -100, max: 100, step: 0.1, label: "ScoreY" })
+        folder.addBinding(this.scoreMesh.position, "z", { min: -100, max: 100, step: 0.1, label: "ScoreZ" })
+      },
+      undefined,
+      (err) => console.error("Font load error:", err)
+    )
+  }
+
+  goStartGame() {
+    const countdownData = [
+      { texture: this.textures.three, geometry: new THREE.PlaneGeometry(0.669, 1) },
+      { texture: this.textures.two, geometry: new THREE.PlaneGeometry(0.712, 1) },
+      { texture: this.textures.one, geometry: new THREE.PlaneGeometry(0.42, 1) },
+      { texture: this.textures.go, geometry: new THREE.PlaneGeometry(1.914, 1) },
+    ]
+
+    let index = 0
+    let currentMesh = null
+
+    const showCountdownStep = () => {
+      // Remove and dispose previous mesh
+      if (currentMesh) {
+        this.scene.remove(currentMesh)
+        currentMesh.geometry.dispose()
+        currentMesh.material.dispose()
+      }
+
+      // If finished, start the game
+      if (index >= countdownData.length) {
+        this.onStartGame()
+        return
+      }
+
+      // Create and display current countdown mesh
+      const { texture, geometry } = countdownData[index]
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+      })
+
+      currentMesh = new THREE.Mesh(geometry, material)
+      currentMesh.position.set(0, 0, 0) // Center
+      this.scene.add(currentMesh)
+
+      index++
+      setTimeout(showCountdownStep, 1000) // Auto move to next after 1s
+    }
+
+    showCountdownStep() // Start countdown
+  }
+
   addBucket() {
     if (!this.textures.bucket) {
       console.warn("Bucket texture not loaded")
@@ -169,7 +281,13 @@ export class Game {
     })
     this.world.addBody(this.bucketBody)
 
-    this.addPanel()
+    const bucket = this.pane.addFolder({
+      title: "Bucket",
+      expanded: true,
+    })
+
+    bucket.addBinding(this.bucket.position, "x", { min: -5, max: 5, step: 0.01 })
+    bucket.addBinding(this.bucket.position, "y", { min: -5, max: 5, step: 0.01 })
   }
 
   addGround() {
@@ -200,10 +318,18 @@ export class Game {
       console.log("Textures loaded:", Object.keys(this.textures))
 
       this.addBackground()
+      this.setupPhysics()
+      // this.setupPhysics()
+      this.addLight()
+      this.createScore()
+
+      this.goStartGame()
       this.addBucket()
       this.addGround()
       this.setUpEventListeners()
-      this.setupCollisionEvents
+      this.setupCollisionEvents()
+
+      this.addPanel()
 
       // Start animation
       this.animate = this.animate.bind(this)
@@ -297,13 +423,22 @@ export class Game {
     camera.addBinding(this.camera.position, "y", { min: -8, max: 8, step: 0.01, label: "Camera Y" })
     camera.addBinding(this.camera.position, "z", { min: -8, max: 8, step: 0.01, label: "Camera Z" })
 
-    const bucket = this.pane.addFolder({
-      title: "Bucket",
+    this.scorePanel = this.pane.addFolder({
+      title: "Score",
       expanded: true,
     })
+    this.scorePanel.addBinding(this, "score", { label: "Score" })
+  }
 
-    bucket.addBinding(this.bucket.position, "x", { min: -5, max: 5, step: 0.01 })
-    bucket.addBinding(this.bucket.position, "y", { min: -5, max: 5, step: 0.01 })
+  onStartGame() {
+    if (this.isStartGame) {
+      return
+    }
+
+    this.isStartGame = true
+    this.spawnTimer = 0
+    // this.scene.remove(this.onStartGame)
+    // Game logic starts after countdown now
   }
 
   setUpEventListeners() {
@@ -320,6 +455,7 @@ export class Game {
     this.onMouseMove = this.onMouseMove.bind(this)
     this.onMouseUp = this.onMouseUp.bind(this)
 
+    this.canvas.addEventListener("click", this.onStartGame)
     this.canvas.addEventListener("mousedown", this.onMouseDown)
     this.canvas.addEventListener("mousemove", this.onMouseMove)
     this.canvas.addEventListener("mouseup", this.onMouseUp)
@@ -360,6 +496,7 @@ export class Game {
 
   onMouseDown(event) {
     event.preventDefault()
+
     const worldCoords = this.screenToWorldCoords(event.clientX, event.clientY)
 
     if (this.isPointInBucket(worldCoords.x, worldCoords.y)) {
@@ -450,8 +587,8 @@ export class Game {
   }
 
   spawnItem() {
-    const isPopcorn = Math.random() > 0.5
-    const isGold = Math.random() > 0.9 // 10% chance for gold popcorn
+    const isPopcorn = Math.random() > 0.6 // 60% chance for normal popcorn
+    const isGold = Math.random() > 0.95 // 5% chance for gold popcorn
 
     let texture
     if (isGold) {
@@ -533,10 +670,14 @@ export class Game {
 
         // Add scoring logic here
         if (item.userData.isGold) {
+          this.score += 10
+          // this.scoreMesh.
           console.log("Gold popcorn caught! +10 points")
         } else if (item.userData.isPopcorn) {
+          this.score += 1
           console.log("Popcorn caught! +1 point")
         } else {
+          this.score -= 1
           console.log("Burnt popcorn caught! -1 point")
         }
         continue
@@ -551,17 +692,21 @@ export class Game {
   }
 
   animate() {
+    this.world.step(1 / 60)
     requestAnimationFrame(this.animate)
-    const delta = this.clock.getDelta()
-    this.spawnTimer += delta
+    // console.log("this.isStartGame", this.isStartGame)
+    if (this.isStartGame != null && this.isStartGame) {
+      const delta = this.clock.getDelta()
+      this.spawnTimer += delta
 
-    // Spawn items every 0.8 seconds
-    if (this.spawnTimer > 0.8) {
-      this.spawnItem()
-      this.spawnTimer = 0
+      // Spawn items every 0.8 seconds
+      if (this.spawnTimer > 0.8) {
+        this.spawnItem()
+        this.spawnTimer = 0
+      }
+
+      this.updateItems()
     }
-
-    this.updateItems()
     this.renderer.render(this.scene, this.camera)
   }
 
