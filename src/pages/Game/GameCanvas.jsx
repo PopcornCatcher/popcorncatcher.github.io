@@ -1,32 +1,3 @@
-// import { useEffect, useRef } from "react"
-// import { Game } from "./Game"
-
-// const GameCanvas = () => {
-//   const containerRef = useRef(null)
-//   const gameRef = useRef(null)
-
-//   useEffect(() => {
-//     if (containerRef.current) {
-//       gameRef.current = new Game(containerRef.current)
-//     }
-
-//     return () => {
-//       if (gameRef.current) {
-//         gameRef.current.dispose()
-//       }
-//     }
-//   }, [])
-
-//   return (
-//     <div
-//       ref={containerRef}
-//       className="webgl"
-//       style={{ width: "100vw", height: "100vh", overflow: "hidden" }}
-//     />
-//   )
-// }
-
-// export default GameCanvas
 import { useEffect, useRef } from "react"
 import { Game } from "./Game"
 
